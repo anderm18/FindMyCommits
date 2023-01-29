@@ -10,9 +10,14 @@
 #######################################################################
 
 from flask import Flask, request
+import flask
 from queries import Query
 import json
 import requests
+
+print(flask.__version__)
+print(json.__version__)
+print(requests.__version__)
 
 app = Flask(__name__)
 
@@ -28,6 +33,13 @@ def get_commits():
 	
 	return Queries.get_history()
 
+@app.route('/getsrc', methods=['POST'])
+def getsrc():
+    repo = git.Repo('./mysite')
+    origin = repo.remotes.origin
+    repo.create_head('master', origin.refs.master).set_tracking_branch(origin.refs.master).checkout()
+    origin.pull()
+    return 'Success', 200
 
 if __name__ == "__main__":
 	app.run()

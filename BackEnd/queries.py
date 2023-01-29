@@ -110,4 +110,4 @@ class Query:
 			next = history["data"]["repository"]["refs"]["pageInfo"]["hasNextPage"]
 			end = history["data"]["repository"]["refs"]["pageInfo"]["endCursor"]
 
-		return output
+		return json.dumps(output)
