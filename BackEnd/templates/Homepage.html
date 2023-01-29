@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+
+<head>
+    <title>FindMyCommits API</title>
+</head>
+
+<body>
+    <h2>FindMyCommits API</h2>
+    <p>You've reached the FindMyCommits API Homepage. Below are the different endpoints available:</p>
+
+    <h4>
+        <b>
+            GET / - The homepage of the API (You're currently here) 
+        </b>
+    </h4>
+    <h4>
+        <b>
+            POST /getcommits - Takes 3 Body Form-Data Keys: name, link, and token. Returns a JSON listing every commit the given name in the given link (repository).
+        </b>
+    </h4>
+    <h4>
+        <b>
+            POST /getsrc - When reached, it will pull code from the FindMyCommits repository on GitHub (used for CI)
+        </b>
+    </h4>
+
+</body>

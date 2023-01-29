@@ -9,7 +9,7 @@
 #
 #######################################################################
 
-from flask import Flask, request
+from flask import Flask, request, render_template
 import flask
 from queries import Query
 import json
@@ -21,6 +21,11 @@ print(json.__version__)
 print(requests.__version__)
 
 app = Flask(__name__)
+
+@app.route('/', methods=['GET'])
+def homepage():
+	return render_template('Homepage.html')
+
 
 @app.route('/getcommits', methods=['POST'])
 def get_commits():
