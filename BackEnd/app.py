@@ -37,7 +37,7 @@ def get_commits():
 @app.route('/getsrc', methods=['POST'])
 def getsrc():
 
-	# Just triggering a commit to test webhook
+	# Just triggering a commit to test webhook again
     repo = git.Repo('./mysite')
     origin = repo.remotes.origin
     repo.create_head('master', origin.refs.master).set_tracking_branch(origin.refs.master).checkout()
