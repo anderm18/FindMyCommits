@@ -20,8 +20,8 @@ jobs:
       
     - name: Install PythonAnywhere API
       run: |
-        apt-get update
-        apt-get install -y rsync
+        sudo apt-get update
+        sudo apt-get install -y rsync
         pip install --upgrade pythonanywhere
       
     - name: Deploy Back End to PythonAnywhere
