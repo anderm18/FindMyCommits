@@ -1,0 +1,30 @@
+name: Deploy to PythonAnywhere
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Updated Code
+      uses: actions/checkout@v2
+      
+    - name: Start Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+      
+    - name: Install PythonAnywhere API
+      run: |
+        pip install pythonanywhere
+      
+    - name: Deploy Back End to PythonAnywhere
+      run: |
+        python -m pythonanywhere.api_client --username=${{ secrets.PYANY_USER }} --token=${{ secrets.PYANY_TOKEN }} webapp michaeljanderson.pythonanywhere.com code-update /home/michaeljanderson/mysite
+        python -m pythonanywhere.api_client --username=${{ secrets.PYANY_USER }} --token=${{ secrets.PYANY_TOKEN }} webapp michaeljanderson.pythonanywhere.com reload
+        
+        
