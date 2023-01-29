@@ -26,4 +26,4 @@ jobs:
       
     - name: Deploy Back End to PythonAnywhere
       run: |
-        python -c "from pythonanywhere import upload; upload(username='${{secrets.PYANY_USER}}', token='{{$PYANY_TOKEN}}', src='./', dst='/home/${{PYANY_USER}}/mysite')"
+        python -c "from pythonanywhere import upload; upload(username=${{secrets.PYANY_USER}}, token=${{secrets.PYANY_TOKEN}}, src='./', dst='/home/${{PYANY_USER}}/mysite')"
