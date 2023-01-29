@@ -24,7 +24,7 @@ jobs:
       
     - name: Deploy Back End to PythonAnywhere
       run: |
-        python -m pythonanywhere.api_client --username=${{ secrets.PYANY_USER }} --token=${{ secrets.PYANY_TOKEN }} webapp michaeljanderson.pythonanywhere.com code-update /home/michaeljanderson/mysite
-        python -m pythonanywhere.api_client --username=${{ secrets.PYANY_USER }} --token=${{ secrets.PYANY_TOKEN }} webapp michaeljanderson.pythonanywhere.com reload
+        python -m pythonanywhere --username=${{ secrets.PYANY_USER }} --token=${{ secrets.PYANY_TOKEN }} webapp michaeljanderson.pythonanywhere.com code-update /home/michaeljanderson/mysite
+        python -m pythonanywhere --username=${{ secrets.PYANY_USER }} --token=${{ secrets.PYANY_TOKEN }} webapp michaeljanderson.pythonanywhere.com reload
         
         
