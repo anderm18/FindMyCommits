@@ -20,7 +20,7 @@ jobs:
       
     - name: Install PythonAnywhere API
       run: |
-        pip install pythonanywhere
+        pip install --upgrade pythonanywhere
       
     - name: Deploy Back End to PythonAnywhere
       run: |
