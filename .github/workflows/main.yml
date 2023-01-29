@@ -20,11 +20,10 @@ jobs:
       
     - name: Install PythonAnywhere API
       run: |
+        apt-get update
+        apt-get install -y rsync
         pip install --upgrade pythonanywhere
       
     - name: Deploy Back End to PythonAnywhere
       run: |
-        python -m pythonanywhere --username=${{ secrets.PYANY_USER }} --token=${{ secrets.PYANY_TOKEN }} webapp michaeljanderson.pythonanywhere.com code-update /home/michaeljanderson/mysite
-        python -m pythonanywhere --username=${{ secrets.PYANY_USER }} --token=${{ secrets.PYANY_TOKEN }} webapp michaeljanderson.pythonanywhere.com reload
-        
-        
+        python -m pythonanywhere upload --username=${{secrets.PYANY_USER}} --token=${{secrets.PYANY_TOKEN}} --src=./ --dst=/home/${{secrets.PYANY_USER}}/mysite
