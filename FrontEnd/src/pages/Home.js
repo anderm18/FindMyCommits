@@ -64,7 +64,6 @@ const Commits = () => {
 
 
             const response = await fetch('http://michaeljanderson.pythonanywhere.com/getcommits', {
-                mode: 'no-cors',
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
