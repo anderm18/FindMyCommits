@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import Box from '@mui/material/Box';
 import { Card, Grid, CardContent, Zoom, Typography, Button, TextField, Hidden, Chip} from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -55,7 +55,81 @@ function ToDatePicker(param) {
     );
 }
 
+const Commits = () => {
+
+    const [commitdata, setCommitData] = useState([]);
+
+    useEffect(() => {
+        const fetchCommits = async () => {
+
+
+            const response = await fetch('http://michaeljanderson.pythonanywhere.com/getcommits', {
+                mode: 'no-cors',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name: "anderm18", link: "https://github.com/anderm18/HASSPathways", token: "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"})
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log(data);
+            }).catch(error => console.error(error));
+            const responseData = await response.json()
+            
+
+            setCommitData(responseData)
+        };
+        fetchCommits()
+    }, []);
+
+    console.log(commitdata)
+    return (
+        <Grid item style={{
+            paddingTop: '10px',
+            marginLeft: '30px',
+            marginRight: '30px',
+            width: '100vw'
+        }}>
+        
+            <Card style={{
+                display: 'flex',
+                height: '70px'
+            }}>
+                <Box style={{ flexDirection: 'column'}}>
+                    <CardContent style={{flex: '1 0 auto'}}>
+                        <Typography style={{
+                            overflow: 'hidden',
+                            position: 'absolute',
+                            zIndex: '0',
+                            textOverflow: 'ellipsis',
+                            maxWidth: 'max(70vw, 100px)',
+                            paddingTop: '6px'
+                        }} gutterBottom>
+                        https://github.com/anderm18/HASSPathways/commit/a5711891e1f618e58268a6838e29ee5ae5b98594
+                        </Typography>
+                    </CardContent>
+                </Box>
+                <Box style={{right: '37px',position: 'absolute', paddingTop: '7px', backgroundColor: '#fff'}}>
+                <div style={{position: 'absolute', right: '0px'}}>
+                    <Chip label='+400' align="right" color='success' style={{marginRight: '5px'}}/>
+                    <Chip label='-20' align="right" color='error'/>
+                </div>
+                <div style={{paddingTop:' 33px', paddingLeft: '7px'}}>
+                    <Typography style={{paddingRight: '3px'}}>
+                        September 4, 2022
+                    </Typography>
+                </div>
+                </Box>
+            </Card>
+        </Grid>    
+    );
+
+}
+
 export class Home extends React.Component {
+
+   
 
     render() {
         return(
@@ -142,44 +216,7 @@ export class Home extends React.Component {
                             paddingTop: '10px',
                             width: '100vw'
                         }}>
-                            <Grid item style={{
-                                paddingTop: '10px',
-                                marginLeft: '30px',
-                                marginRight: '30px',
-                                width: '100vw'
-                            }}>
-                            
-                                <Card style={{
-                                    display: 'flex',
-                                    height: '70px'
-                                }}>
-                                    <Box style={{ flexDirection: 'column'}}>
-                                        <CardContent style={{flex: '1 0 auto'}}>
-                                            <Typography style={{
-                                                overflow: 'hidden',
-                                                position: 'absolute',
-                                                zIndex: '0',
-                                                textOverflow: 'ellipsis',
-                                                maxWidth: 'max(70vw, 100px)',
-                                                paddingTop: '6px'
-                                            }} gutterBottom>
-                                            https://github.com/anderm18/HASSPathways/commit/a5711891e1f618e58268a6838e29ee5ae5b98594
-                                            </Typography>
-                                        </CardContent>
-                                    </Box>
-                                    <Box style={{right: '37px',position: 'absolute', paddingTop: '7px', backgroundColor: '#fff'}}>
-                                    <div style={{position: 'absolute', right: '0px'}}>
-                                        <Chip label='+400' align="right" color='success' style={{marginRight: '5px'}}/>
-                                        <Chip label='-20' align="right" color='error'/>
-                                    </div>
-                                    <div style={{paddingTop:' 33px', paddingLeft: '7px'}}>
-                                        <Typography style={{paddingRight: '3px'}}>
-                                            September 4, 2022
-                                        </Typography>
-                                    </div>
-                                    </Box>
-                                </Card>
-                            </Grid>            
+                            <Commits />       
                         </Grid>
                     </Box>
                 </div>

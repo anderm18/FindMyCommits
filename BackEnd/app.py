@@ -29,9 +29,9 @@ def homepage():
 
 @app.route('/getcommits', methods=['POST'])
 def get_commits():
-	name = request.form.get('name')
-	link = request.form.get('link')
-	token = request.form.get('token')
+	name = request.json.get('name')
+	link = request.json.get('link')
+	token = request.json.get('token')
 	Queries = Query(name, link, token)
 
 	if Queries.get_id() == None:
