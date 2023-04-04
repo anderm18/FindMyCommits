@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import axios from 'axios';
 import Box from '@mui/material/Box';
 import { Card, Grid, CardContent, Zoom, Typography, Button, TextField, Hidden, Chip} from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -57,32 +58,28 @@ function ToDatePicker(param) {
 
 const Commits = () => {
 
-    const [commitdata, setCommitData] = useState([]);
+    const [commits, setCommits] = useState([])
 
     useEffect(() => {
         const fetchCommits = async () => {
-
-
-            const response = await fetch('http://michaeljanderson.pythonanywhere.com/getcommits', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ name: "anderm18", link: "https://github.com/anderm18/HASSPathways", token: "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"})
-            })
-            .then(res => res.json())
-            .then(data => {
-                console.log(data);
-            }).catch(error => console.error(error));
-            const responseData = await response.json()
-            
-
-            setCommitData(responseData)
+            try {
+                const response = await fetch('http://localhost:5000/getcommits', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({
+                        name: 'anderm18',
+                        link: 'https://github.com/anderm18/HASSPathways',
+                        token: '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'
+                    })
+                });
+                const data = await response.json();
+                setCommits(data);
+            } catch (error) {
+                console.error(error);
+            }
         };
         fetchCommits()
     }, []);
-
-    console.log(commitdata)
     return (
         <Grid item style={{
             paddingTop: '10px',

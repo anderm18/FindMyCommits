@@ -1,24 +1,25 @@
 import json
 import requests
+import subprocess
+from subprocess import PIPE
 
 class Query:
 
 	def __init__(self, name, link, token):
 
-		self.owner, self.repo = self.__process_link(link)
+		self.repo = self.__process_link(link)
 		self.header = {
 			"Authorization": str("bearer " + token),
 			"Content-Type":	"application/json"
 		}
-		self.id = self.__get_id(name)
+		self.email = self.__get_id(name)
+		print(self.repo)
 
 	def __process_link(self, repo_link):
 
-		repo_link = repo_link[repo_link.find('.com/')+5:len(repo_link)]
-		owner = repo_link[0:repo_link.find('/')]
-		repo = repo_link[repo_link.find('/')+1:len(repo_link)]
-
-		return (owner, repo)
+		repo_link = repo_link[repo_link.rfind("/", 0, repo_link.rfind("/"))+1:]
+		
+		return repo_link
 
 	def __get_id(self, name):
 
@@ -26,7 +27,7 @@ class Query:
 			"query": f"""
       			query {{
         			user(login:"{name}") {{
-          				id
+          				email
         			}}
       			}}
     		"""
@@ -34,10 +35,10 @@ class Query:
 
 		response = self.__send_request(query)["data"]["user"]
 		
-		if response != None:
-			return response["id"]
+		if response == None:
+			return None
 		
-		return None
+		return response["email"]
 
 	def __send_request(self, query):
 		response = requests.post("https://api.github.com/graphql", json=query, headers=self.header)
@@ -46,68 +47,19 @@ class Query:
 		return None
 
 	def get_id(self):
-		return self.id
+		return self.email
 
-	def __query_history(self, end):
+	def __query_history(self):
+		child = subprocess.Popen(['gh', 'search', 'commits', '--author-email', self.email, '--repo', self.repo, '--limit', '1000', '--json', 'commit'], \
+			stdin=PIPE, stdout=PIPE, stderr=PIPE)
+		output, error = child.communicate()
+		print(error)
+		out = output.decode("utf-8")
 
-		print(self.repo)
-		print(self.owner)
-		query = {
-			"query": f"""
-				query {{
-					repository(owner: "{self.owner}", name: "{self.repo}") {{
-						refs(refPrefix: "refs/heads/", first: 100, {'after: "' + end +  '"' if end else ''}) {{
-							nodes {{
-								name
-								target {{
-									... on Commit {{
-										history(author: {{id: "{self.id}"}}) {{
-											edges {{
-												node {{
-													message
-													additions
-													deletions
-													url
-												}}
-											}}
-										}}
-									}}
-								}}
-							}} pageInfo {{
-								endCursor
-								hasNextPage
-							}}
-						}}
-					}}
-				}}
-			"""
-		}
-
-		response = self.__send_request(query)
-		# print(response)
-
-		if response: 
-			if response['data']['repository']['refs']['nodes'][0]['target']['history']['edges']:
-				return response
-
-		return None
+		return json.loads(out)
 
 	def get_history(self):
 
-		next = True
-		end = None
-		output = []
+		chunks = [i['commit']['tree']['sha'] for i in self.__query_history()]
 
-		while next:
-			history = self.__query_history(end)
-
-			if history == None:
-				return dict()
-
-			for node in history["data"]["repository"]["refs"]["nodes"]:
-				output.append(node["target"]["history"]["edges"])		
-
-			next = history["data"]["repository"]["refs"]["pageInfo"]["hasNextPage"]
-			end = history["data"]["repository"]["refs"]["pageInfo"]["endCursor"]
-
-		return json.dumps(output)
+		return chunks
