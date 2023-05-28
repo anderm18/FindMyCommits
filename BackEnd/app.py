@@ -9,60 +9,18 @@
 #
 #######################################################################
 
-from flask import Flask, request, render_template, jsonify
-from flask_cors import CORS
-import flask
-from queries import Query
-import json
-import requests
-import git
+from fastapi import FastAPI
+import queries
+from models import GatherHistory
 
-print(flask.__version__)
-print(json.__version__)
-print(requests.__version__)
+app = FastAPI()
 
-app = Flask(__name__)
-CORS(app)
+@app.post('/getcommits')
+async def get_commits(body: GatherHistory):
 
-@app.route('/', methods=['GET'])
-def homepage():
-	return render_template('Homepage.html')
-
-
-@app.route('/getcommits', methods=['POST'])
-def get_commits():
-	
-	name = request.json.get('name')
-	link = request.json.get('link')
-	token = request.json.get('token')
-
-	print(name)
-	print(link)
-	print(token)
-
-	if 'github' not in link:
+	if 'github' not in body.link:
 		return {'error': 'Only GitHub Links Supported'}
-	Queries = Query(name, link, token)
 
-	if Queries.get_id() == None:
-		return {'error': 'User Not Found'}
+	response = await queries.get_history(body.name, body.link, body.token)
 
-
-		
-	response = Queries.get_history()
-	#response.headers['Access-Control-Allow-Origin'] = '*'
-	#response.headers['Access-Control-Allow-Methods'] = 'POST'
 	return response
-
-@app.route('/getsrc', methods=['POST'])
-def getsrc():
-
-	# Just triggering a commit to test webhook again
-    repo = git.Repo('./mysite')
-    origin = repo.remotes.origin
-    repo.create_head('master', origin.refs.master).set_tracking_branch(origin.refs.master).checkout()
-    origin.pull()
-    return 'Success', 200
-
-if __name__ == "__main__":
-	app.run(debug=True)

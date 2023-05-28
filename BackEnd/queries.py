@@ -1,65 +1,106 @@
 import json
-import requests
+import httpx
 import subprocess
 from subprocess import PIPE
 
-class Query:
 
-	def __init__(self, name, link, token):
+def __process_link(repo_link: str):
+	return repo_link[repo_link.rfind("/", 0, repo_link.rfind("/"))+1:]
 
-		self.repo = self.__process_link(link)
-		self.header = {
-			"Authorization": str("bearer " + token),
-			"Content-Type":	"application/json"
+async def __send_request(query: dict, token: str):
+
+	response = None
+
+	header = {
+		"Authorization": str("bearer " + token),
+		"Content-Type":	"application/json"
+	}
+
+	async with httpx.AsyncClient() as client:
+		response = await client.post('https://api.github.com/graphql', headers=header, json=query, timeout=None)
+	
+	response = response.json()
+
+	return response
+
+async def __query_id(name, token):
+
+	query = {
+		"query": f"""
+	  		query {{
+	   			user(login:"{name}") {{
+	   				id
+	   			}}
+	  		}}
+		"""
+	}	
+
+	response = await __send_request(query, token)
+
+	return response
+
+async def __query_history(repo: str, id: str, token):
+
+	owner, name = repo.split("/")
+
+	query = { "query": f"""
+		query {{
+			repository(owner: "{owner}", name: "{name}") {{
+				refs(first: 100, refPrefix: "refs/heads/") {{
+					nodes {{
+						name
+						target {{
+							... on Commit {{
+								history(author: {{id: "{id['data']['user']['id']}"}}, since: "2022-10-01T12:00:00Z") {{
+									nodes {{
+										additions
+										deletions
+										oid
+										message
+										committedDate
+									}}
+								}}
+							}}
+						}}
+					}}
+				}}
+			}}
+		}}
+	""" }
+
+	response = await __send_request(query, token)
+
+	return response
+
+async def get_history(name: str, link: str, token: str):
+
+	repo = __process_link(link)
+
+	user_id = await __query_id(name, token)
+
+	if 'errors' in user_id:
+		return user_id
+
+	commits = dict()
+
+	history = await __query_history(repo, user_id, token)
+
+	if 'errors' in history:
+		return history
+
+	nodes = []
+
+	for i in history['data']['repository']['refs']['nodes']:
+		nodes.extend(i['target']['history']['nodes'])
+
+	for i in nodes:
+		commits[i['oid']] = {
+			'additions': i['additions'],
+			'deletions': i['deletions'],
+			'message': i['message'],
+			'committedDate': i['committedDate']
 		}
-		self.email = self.__get_id(name)
-		print(self.repo)
 
-	def __process_link(self, repo_link):
+	return commits
 
-		repo_link = repo_link[repo_link.rfind("/", 0, repo_link.rfind("/"))+1:]
-		
-		return repo_link
 
-	def __get_id(self, name):
-
-		query = {
-			"query": f"""
-      			query {{
-        			user(login:"{name}") {{
-          				email
-        			}}
-      			}}
-    		"""
-    	}
-
-		response = self.__send_request(query)["data"]["user"]
-		
-		if response == None:
-			return None
-		
-		return response["email"]
-
-	def __send_request(self, query):
-		response = requests.post("https://api.github.com/graphql", json=query, headers=self.header)
-		if response.status_code == 200:
-			return json.loads(response.text)
-		return None
-
-	def get_id(self):
-		return self.email
-
-	def __query_history(self):
-		child = subprocess.Popen(['gh', 'search', 'commits', '--author-email', self.email, '--repo', self.repo, '--limit', '1000', '--json', 'commit'], \
-			stdin=PIPE, stdout=PIPE, stderr=PIPE)
-		output, error = child.communicate()
-		print(error)
-		out = output.decode("utf-8")
-
-		return json.loads(out)
-
-	def get_history(self):
-
-		chunks = [i['commit']['tree']['sha'] for i in self.__query_history()]
-
-		return chunks
