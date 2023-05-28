@@ -4,8 +4,8 @@
 #   GitHub: anderm18
 #	
 #	Purpose: Use the GitHub GraphQL API to get a user's commit history
-#			 by username. Allow function to be accessed through REST, 
-#			 using Flask.
+#			 by username. Allows function to be accessed through REST, 
+#			 using Fast.
 #
 #######################################################################
 
