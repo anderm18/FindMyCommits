@@ -8,11 +8,11 @@ import HomeCard from './components/HomeCard';
 import Commits from './components/CommitControl';
 import CommitResult from './components/CommitResult';
 
-const root = ReactDOM.createRoot(
+const root: ReactDOM.Root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
-function Homepage() {
+function Homepage(): JSX.Element {
   return(
     <>
       <HomeCard/>
@@ -20,13 +20,15 @@ function Homepage() {
   );
 }
 
-function CommitPage() {
+function CommitPage(): JSX.Element {
 
-  const [state, setState] = useState(0);
+  const [state, setState]: [number, React.Dispatch<React.SetStateAction<number>>] = useState(0);
+  const [responseRef, setResponseRef]: [JSON, React.Dispatch<React.SetStateAction<JSON>>] = useState(JSON);
+
   return(
     <>
-      <Commits setFunc={setState}/>
-      <CommitResult state={state}/>
+      <Commits setFunc={setState} setResponseRef={setResponseRef} state={state}/>
+      <CommitResult state={state} responseRef={responseRef}/>
     </>
   );
 }

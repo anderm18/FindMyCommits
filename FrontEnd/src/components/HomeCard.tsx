@@ -1,6 +1,6 @@
 import { AppBar, Box, Button, Card, CardContent, Grid, Paper, Typography } from "@mui/material";
 
-export default function HomeCard() {
+export default function HomeCard(): JSX.Element {
     return(
         <Grid container alignItems='center'>
             <Grid item xs={6}>

@@ -1,11 +1,11 @@
-import { Box, Card, FormControlLabel, Switch, TextField, ThemeProvider, Tooltip, createTheme, IconButton, Button, CardContent } from "@mui/material";
+import { Box, Card, FormControlLabel, Switch, TextField, ThemeProvider, Tooltip, createTheme, IconButton, Button, CardContent, Theme, ClassNameMap } from "@mui/material";
 import {makeStyles} from '@mui/styles';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import HelpIcon from '@mui/icons-material/Help';
 import { Dispatch, SetStateAction, useState } from "react";
 
-const useStyles = makeStyles({
+const useStyles: (props?: any) => ClassNameMap<"switch"> = makeStyles({
     switch: {
         "& .Mui-checked": {
             color: '#1876d2',
@@ -17,7 +17,7 @@ const useStyles = makeStyles({
     }
 });
 
-const theme = createTheme({
+const theme: Theme = createTheme({
     palette: {
         mode: 'dark',
         primary: {
@@ -29,7 +29,7 @@ const theme = createTheme({
     }, 
 });
 
-const TooltipItem = (props: any) => {
+function TooltipItem(props: {title: string}): JSX.Element {
     return(
         <ThemeProvider theme={theme}>
             <Tooltip title={props.title} arrow>
@@ -41,7 +41,7 @@ const TooltipItem = (props: any) => {
     );
 }
 
-const DatePick = (props: any) => {
+function DatePick(props: {label: string, onChange: Dispatch<SetStateAction<null>>}): JSX.Element {
     return(
         <ThemeProvider theme={theme}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -51,36 +51,27 @@ const DatePick = (props: any) => {
     );
 }
 
-export default function CommitControl(props: any) {
+export default function CommitControl(props: {
+        setFunc: React.Dispatch<React.SetStateAction<number>>, 
+        setResponseRef: React.Dispatch<React.SetStateAction<JSON>>, 
+        state: number
+    }): JSX.Element {
 
-    const [ghublink, setGHubLink] = useState('');
-    const [ghubUser, setGHubUser] = useState('');
-    const [toDate, setToDate] = useState(null);
+    const [ghublink, setGHubLink]: [string ,Dispatch<SetStateAction<string>>] = useState('');
+    const [ghubUser, setGHubUser]: [string ,Dispatch<SetStateAction<string>>]  = useState('');
+    const [toDate, setToDate]: [Date|null, Dispatch<SetStateAction<null>>] = useState(null);
     const [fromDate, setFromDate]: [Date|null, Dispatch<SetStateAction<null>>] = useState(null);
-    const [student, setStudent] = useState(false);
-    const [excludeMerge, setExcludeMerge] = useState(false);
+    const [student, setStudent]: [boolean ,Dispatch<SetStateAction<boolean>>] = useState(false);
+    const [excludeMerge, setExcludeMerge]: [boolean ,Dispatch<SetStateAction<boolean>>] = useState(false);
 
-    const submitForm = async () => {
+    const submitForm: () => Promise<void> = async () => {
 
-        var ToDateObject: Date|null = null;
-        var FromDateObject: Date|null = null;
-
-        if (toDate !== null) {
-            ToDateObject = new Date(toDate);
-        }
-        if (fromDate !== null) {
-            FromDateObject = new Date(fromDate);
-        }
+        var ToDateObject: Date|null = toDate !== null ? new Date(toDate) : null;
+        var FromDateObject: Date|null = fromDate !== null ? new Date(fromDate) : null;
 
         props.setFunc(1);
 
-        console.log(JSON.stringify({
-            "name": ghubUser,
-            "link": ghublink,
-            
-        }));
-
-        var response = await fetch('http://127.0.0.1:8000/getcommits', {
+        await fetch('http://127.0.0.1:8000/getcommits', {
             headers: {
                 "Content-Type": "application/json"
             },
@@ -88,27 +79,24 @@ export default function CommitControl(props: any) {
             body: JSON.stringify({
                 name: ghubUser,
                 link: ghublink,
-
             })
-        }).then((res) => {
-            Promise.resolve(res);
-            console.log(res.json());
-        }
-        );
-
-
-
+        }).then(async (res: Response) => {
+            await res.json().then((data: JSON) => {
+                props.setResponseRef(data);
+                console.log(data);
+                props.setFunc(2);
+            });
+        });
 
         console.log(ghublink);
         console.log(ghubUser);
         console.log(student);
         console.log(ToDateObject?.getMonth(), ToDateObject?.getDay(), ToDateObject?.getFullYear());
         console.log(FromDateObject?.getDate());
-        
     }
 
-    const classes = useStyles();
-    const inTheme = theme;
+    const classes: ClassNameMap<"switch"> = useStyles();
+    const inTheme: Theme = theme;
     
     return(
         <Box sx={{bgcolor:'#0E0B10', marginTop: {xs: '10px', md: '0'}}}>
@@ -136,7 +124,7 @@ export default function CommitControl(props: any) {
                     </Box>
                 </CardContent>
                 <Box sx={{margin: 'auto'}}>
-                    <Button variant='contained' onClick={submitForm}>Find My Commits</Button>
+                    <Button disabled={props.state===1} variant='contained' onClick={submitForm}>Find My Commits</Button>
                 </Box>
             </Card>
             <Box sx={{bgcolor: '#0e0b16', height: '100%', width: '100%'}}>
